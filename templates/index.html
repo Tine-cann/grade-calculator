@@ -49,7 +49,7 @@
         <h3>Prelim Grade: {{ prelim_grade }}</h3>
         <h3>Midterms Grade: {{ midterm_grade }}</h3>
         <h3>Finals Grade: {{ finals_grade }}</h3>
-        <h3>Overall Grade: {{ overall_grade }}</h3>
+        <h3>Overall Grade: {{ "FAILED" if failed_due_to_absences else overall_grade }}</h3>
         <p>To pass with 75%, you need a Midterm grade of 50% and a Final grade of 92%.</p>
         <p>To achieve 90%, you need a Midterm grade of 70% and a Final grade of 94%.</p>
     {% endif %}
