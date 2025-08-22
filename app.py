@@ -54,7 +54,7 @@ html_template = """
         <h3>Prelim Grade: {{ prelim_grade }}</h3>
         <h3>Midterms Grade: {{ midterm_grade }}</h3>
         <h3>Finals Grade: {{ finals_grade }}</h3>
-        <h3>Overall Grade: {{ overall_grade }}</h3>
+        <h3>Overall Grade: {{ "FAILED" if failed_due_to_absences else overall_grade }}</h3>
         <p>To pass with 75%, you need a Midterm grade of 50% and a Final grade of 92%.</p>
         <p>To achieve 90%, you need a Midterm grade of 70% and a Final grade of 94%.</p>
     {% endif %}
@@ -87,11 +87,15 @@ html_template = """
 
 @app.route("/", methods=["GET", "POST"])
 def calculate():
+    
+    #display none when values are not calculated yet
     error = None
     prelim_grade = midterm_grade = finals_grade = overall_grade = None
     failed_due_to_absences = False
 
+    #requests values from form 
     if request.method == "POST":
+        #catches missing value
         try:
             def get_float(field):
                 val = request.form.get(field, "").strip()
@@ -126,6 +130,7 @@ def calculate():
                 finals_exam, finals_quiz, finals_requirements, finals_recitation
             ]
 
+            #catches if values are valid or not
             if not all(0 <= a <= 100 for a in absences):
                 raise ValueError("Absences must be between 0 and 100")
             if not all(0 <= g <= 100 for g in grades):
@@ -137,40 +142,48 @@ def calculate():
             if total_absences >= 4:
                 failed_due_to_absences = True
 
+            #attendance calculation
             absence_penalty = 0 if total_absences == 0 else 10
             final_attendance = 100 - absence_penalty
 
-            quizzes = [prelim_quiz, midterm_quiz, finals_quiz]
-            requirements = [prelim_requirements, midterm_requirements, finals_requirements]
-            recitations = [prelim_recitation, midterm_recitation, finals_recitation]
+            #gets the prelim class standing
+            prelim_class_standing = round((prelim_quiz * 0.40) + 
+                                          (prelim_requirements * 0.30) + 
+                                          (prelim_recitation * 0.30), 2)
 
-            avg_quiz = sum(quizzes) / len(quizzes)
-            avg_requirements = sum(requirements) / len(requirements)
-            avg_recitation = sum(recitations) / len(recitations)
+            #gets the midterm class standing
+            midterms_class_standing = round((midterm_quiz * 0.40) + 
+                                          (midterm_requirements * 0.30) + 
+                                          (midterm_recitation * 0.30), 2)
+            
+            #gets the final class standing
+            finals_class_standing = round((finals_quiz * 0.40) + 
+                                          (finals_requirements * 0.30) + 
+                                          (finals_recitation * 0.30), 2)
 
-            class_standing = round((avg_quiz * 0.40) +
-                                   (avg_requirements * 0.30) +
-                                   (avg_recitation * 0.30), 2)
-
+            #computation for prelim grade
             prelim_grade = round((prelim_exam * 0.60) +
                                  (final_attendance * 0.10) +
-                                 (class_standing * 0.30), 2)
+                                 (prelim_class_standing * 0.30), 2)
 
+            #computation for midterm grade
             midterm_grade = round((midterm_exam * 0.60) +
                                   (final_attendance * 0.10) +
-                                  (class_standing * 0.30), 2)
+                                  (midterms_class_standing * 0.30), 2)
 
+            #computation for final grade
             finals_grade = round((finals_exam * 0.60) +
                                  (final_attendance * 0.10) +
-                                 (class_standing * 0.30), 2)
+                                 (finals_class_standing * 0.30), 2)
 
+            #computation for overall grade
             overall_grade = round(
                 (prelim_grade * 0.20) + (midterm_grade * 0.30) + (finals_grade * 0.50), 2
             )
 
         except ValueError as e:
             error = str(e)
-
+    
     return render_template_string(
         html_template,
         prelim_grade=prelim_grade,
