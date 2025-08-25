@@ -47,7 +47,7 @@ html_template = """
         <input type="number" name="finals_requirements_grade" placeholder="Enter Requirements Grade" min="0" max="100" step="1" required>
         <input type="number" name="finals_recitation_grade" placeholder="Enter Recitation Grade" min="0" max="100" step="1" required>
 
-        <button type="submit">Calculate Final Grade</button>
+        <button type="submit">Calculate Grades</button>
     </form>
 
     {% if prelim_grade is not none %}
