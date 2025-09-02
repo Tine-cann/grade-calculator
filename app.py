@@ -46,15 +46,33 @@ html_template = """
         <input type="number" name="finals_quizzes_grade" placeholder="Enter Quizzes Grade" min="0" max="100" step="1" required>
         <input type="number" name="finals_requirements_grade" placeholder="Enter Requirements Grade" min="0" max="100" step="1" required>
         <input type="number" name="finals_recitation_grade" placeholder="Enter Recitation Grade" min="0" max="100" step="1" required>
+        <br>
 
         <button type="submit">Calculate Grades</button>
     </form>
+    <br>
+    <br>
+    <br>
 
+    <h1>Results</h1>
     {% if prelim_grade is not none %}
         <h3>Prelim Grade: {{ prelim_grade }}</h3>
         <h3>Midterms Grade: {{ midterm_grade }}</h3>
         <h3>Finals Grade: {{ finals_grade }}</h3>
-        <h3>Overall Grade: {{ "FAILED" if failed_due_to_absences else overall_grade }}</h3>
+        
+
+        {% if failed_due_to_absences %}
+            <h3>Overall Grade: {{ overall_grade }} FAILED</h3>
+        {% elif failed_requirements_not_met %}
+            <h3>Overall Grade: {{overall_grade}} FAILED</h3>
+        {% elif passed_deanslister %}
+            <h3>Overall Grade: {{ overall_grade }} PASSED (QUALIFIED FOR DEAN'S LIST)</h3>
+        {% else %}
+            <h3>Overall Grade: {{ overall_grade }} PASSED</h3>
+        {% endif %}
+        
+        <br>
+        <br>
         <p>To pass with 75%, you need a Midterm grade of 50% and a Final grade of 92%.</p>
         <p>To achieve 90%, you need a Midterm grade of 70% and a Final grade of 94%.</p>
     {% endif %}
@@ -92,6 +110,9 @@ def calculate():
     error = None
     prelim_grade = midterm_grade = finals_grade = overall_grade = None
     failed_due_to_absences = False
+    failed_requirements_not_met = False
+    passed_deanslister = False
+    passed = False
 
     #requests values from form 
     if request.method == "POST":
@@ -138,9 +159,7 @@ def calculate():
 
             total_absences = sum(absences)
 
-            # Mark as failed if absences are 4 or more
-            if total_absences >= 4:
-                failed_due_to_absences = True
+           
 
             #attendance calculation
             absence_penalty = 0 if total_absences == 0 else 10
@@ -181,6 +200,16 @@ def calculate():
                 (prelim_grade * 0.20) + (midterm_grade * 0.30) + (finals_grade * 0.50), 2
             )
 
+            
+            if total_absences >= 4:
+                failed_due_to_absences = True
+            elif midterm_grade >= 70 and finals_grade >= 94:
+                passed_deanslister = True
+            elif midterm_grade <= 50 and finals_grade <= 90:
+                 failed_requirements_not_met = True
+            else:
+                passed = True
+
         except ValueError as e:
             error = str(e)
     
@@ -191,8 +220,9 @@ def calculate():
         finals_grade=finals_grade,
         overall_grade=overall_grade,
         failed_due_to_absences=failed_due_to_absences,
-        error=error,
-    )
+        error=error,passed_deanslister=passed_deanslister,
+        failed_requirements_not_met=failed_requirements_not_met,
+        passed=passed)
 
 if __name__ == "__main__":
     app.run(debug=True)
