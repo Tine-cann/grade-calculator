@@ -152,10 +152,10 @@ def calculate():
             ]
 
             #catches if values are valid or not
-            if not all(0 <= a <= 100 for a in absences):
-                raise ValueError("Absences must be between 0 and 100")
+            if not all(0 <= a for a in absences):
+                raise ValueError("Absences must be 0 or greater than 0.")
             if not all(0 <= g <= 100 for g in grades):
-                raise ValueError("All grades must be between 0 and 100")
+                raise ValueError("All grades must be between 0 and 100.")
 
             total_absences = sum(absences)
 
