@@ -27,21 +27,21 @@ html_template = """
 
     <form method="POST">
         <h2>Prelims</h2>
-        <input type="number" name="absences_prelim" placeholder="Enter amount of Absences" min="0" max="100" step="1" required>
+        <input type="number" name="absences_prelim" placeholder="Enter amount of Absences" min="0" step="1" required>
         <input type="number" name="prelim_exam_grade" placeholder="Enter Prelim Exam Grade" min="0" max="100" step="1" required>
         <input type="number" name="prelim_quizzes_grade" placeholder="Enter Quizzes Grade" min="0" max="100" step="1" required>
         <input type="number" name="prelim_requirements" placeholder="Enter Requirements Grade" min="0" max="100" step="1" required>
         <input type="number" name="prelim_recitation_grade" placeholder="Enter Recitation Grade" min="0" max="100" step="1" required>
 
         <h2>Midterms</h2>
-        <input type="number" name="absences_midterms" placeholder="Enter amount of Absences" min="0" max="100" step="1" required>
+        <input type="number" name="absences_midterms" placeholder="Enter amount of Absences" min="0" step="1" required>
         <input type="number" name="midterm_exam_grade" placeholder="Enter Midterm Exam Grade" min="0" max="100" step="1" required>
         <input type="number" name="midterm_quizzes_grade" placeholder="Enter Quizzes Grade" min="0" max="100" step="1" required>
         <input type="number" name="midterm_requirements" placeholder="Enter Requirements Grade" min="0" max="100" step="1" required>
         <input type="number" name="midterm_recitation_grade" placeholder="Enter Recitation Grade" min="0" max="100" step="1" required>
 
         <h2>Finals</h2>
-        <input type="number" name="absences_finals" placeholder="Enter amount of Absences" min="0" max="100" step="1" required>
+        <input type="number" name="absences_finals" placeholder="Enter amount of Absences" min="0" step="1" required>
         <input type="number" name="finals_exam_grade" placeholder="Enter Final Exam Grade" min="0" max="100" step="1" required>
         <input type="number" name="finals_quizzes_grade" placeholder="Enter Quizzes Grade" min="0" max="100" step="1" required>
         <input type="number" name="finals_requirements_grade" placeholder="Enter Requirements Grade" min="0" max="100" step="1" required>
@@ -70,7 +70,7 @@ html_template = """
         {% else %}
             <h3>Overall Grade: {{ overall_grade }} PASSED</h3>
         {% endif %}
-        
+
         <br>
         <br>
         <p>To pass with 75%, you need a Midterm grade of 50% and a Final grade of 92%.</p>
@@ -200,7 +200,7 @@ def calculate():
                 (prelim_grade * 0.20) + (midterm_grade * 0.30) + (finals_grade * 0.50), 2
             )
 
-            
+            #for overall grade status
             if total_absences >= 4:
                 failed_due_to_absences = True
             elif midterm_grade >= 70 and finals_grade >= 94:
@@ -211,7 +211,7 @@ def calculate():
                 passed = True
 
         except ValueError as e:
-            error = str(e)
+            error = str(e)  
     
     return render_template_string(
         html_template,
